@@ -1,4 +1,4 @@
-FROM docker.elastic.co/logstash/logstash-oss:8.10.2
+FROM logstash:8.9.2
 
 RUN /usr/share/logstash/bin/logstash-plugin remove logstash-integration-aws && \
     /usr/share/logstash/bin/logstash-plugin install logstash-input-s3-cos 
