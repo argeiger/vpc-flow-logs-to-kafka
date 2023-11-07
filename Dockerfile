@@ -1,8 +1,19 @@
-FROM docker.elastic.co/logstash/logstash-oss:8.9.0
+FROM ubuntu:22.04
 
-RUN /usr/share/logstash/bin/logstash-plugin remove logstash-integration-aws && \
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install gpg wget apt-transport-https -y && \
+    wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /usr/share/keyrings/elastic-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/elastic-keyring.gpg] https://artifacts.elastic.co/packages/oss-8.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-8.x.list && \
+    apt-get update && \ 
+    apt-get install logstash-oss=1:8.9.2-1 && \ 
+    chown -R logstash /usr/share/logstash && \ 
+    /usr/share/logstash/bin/logstash-plugin remove logstash-integration-aws && \
     /usr/share/logstash/bin/logstash-plugin install logstash-input-s3-cos 
 
 COPY logstash.conf /usr/share/logstash/pipeline/logstash.conf
+COPY pipelines.yml /usr/share/logstash/config/pipelines.yml
+
+USER logstash
 
 ENTRYPOINT ["/usr/share/logstash/bin/logstash"]
